@@ -4,30 +4,34 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const fileSystem = require('fs');
 const path = require('path');
+const formidable = require('express-formidable');
+const fs = require('fs');
 
-
+// app.use(formidable());
 app.use(morgan('tiny'));
-
+app.use(bodyParser.raw({
+    type: 'application/pdf',
+    limit: '100mb'
+}));
 /**
  *  Partner (Webhook) Endpoint Stubs
  */
-app.post(/.*webhook.*/,
-    bodyParser.json(),
+app.all('*',
     (req, res) => {
-        console.log(JSON.stringify(req.body, null, 4));
-
-        if (req.body.message.content.documents) {
-            const document = req.body.message.content.documents[0];
-            fileSystem.writeFile(path.join(__dirname, document.filename), document.binary, 'base64', function (err) {
-                return (err)
-                    ? res.status(500).send(err)
-                    : res.status(200).send()
-            });
-        }
-
-        res.status(200).send()
+      console.log(req);
+        // console.log(req.files);
+        // console.log(req.fields);
+        // console.log(req.body);
+        fs.writeFile("./test.pdf", req.body,  "binary",function(err) {
+            if(err) {
+                console.log(err);
+            } else {
+                console.log("The file was saved!");
+            }
+        });
+        res.send()
     }
 );
 
-app.listen(process.env.PORT);
-console.log('Stub server listening on port', process.env.PORT);
+app.listen(7777);
+console.log('Stub server listening on port', '7777');
